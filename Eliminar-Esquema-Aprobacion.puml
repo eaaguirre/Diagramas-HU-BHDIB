@@ -1,0 +1,80 @@
+@startuml
+title Eliminar Esquema de Aprobación - HU 833137
+
+' == Actores y Sistemas ==
+actor Usuario as FrontEnd  #99ccff
+participant "PIM Management (APIM)" as APIM <<API Gateway>> #ccffcc
+participant "BHDIB.MS.Approvals (Backend)" as Approvals <<Microservicio>> #ffffcc
+participant "Servicio OTP" as OTP <<Security Service>> #cccc99
+database "Base de Datos Aprobaciones" as DB <<Database>> #ccccff
+database "Log Auditoría" as AuditLog <<Logging>> #ccccff
+
+' == Flujo principal (Success Path) ==
+== Usuario confirma eliminación ==
+
+FrontEnd -> FrontEnd : Mostrar modal de confirmación
+note right of FrontEnd
+Título: ¿Deseas realizar la eliminación?
+Texto: Si eliminas el esquema, no se puede deshacer.
+Acciones: Confirmar / Cancelar
+end note
+
+FrontEnd -> OTP : Validar OTP(token)
+OTP --> FrontEnd : Resultado validación (OK)
+
+== Eliminar esquema ==
+FrontEnd -> APIM : DELETE /api/transactions-approvals/approval-flows/{id}
+APIM -> Approvals : DELETE /api/v1/approval-flows/{id}
+
+== Backend valida estado ==
+Approvals -> DB : Verificar transacciones pendientes (flowId)
+DB --> Approvals : Resultado validación
+
+alt No hay transacciones pendientes
+    Approvals -> DB : Marcar esquema como eliminado (Soft Delete)
+    DB --> Approvals : Confirmación eliminación
+    Approvals --> APIM : JSON éxito eliminación
+    APIM --> FrontEnd : JSON éxito eliminación
+    FrontEnd -> FrontEnd : Mostrar mensaje
+    note right of FrontEnd
+    Título: La eliminación del esquema de aprobación ha sido realizada.
+    Texto: Puedes validar en el listado de esquemas de aprobación.
+    Botón: "Entendido"
+    end note
+
+    FrontEnd -> AuditLog : Registrar acción
+    note right of AuditLog
+    Datos auditados:
+    - Usuario
+    - IP
+    - Fecha/Hora
+    - Acción: Eliminación Esquema Aprobación
+    end note
+
+else Existen transacciones pendientes
+    Approvals --> APIM : Error 409 (Transacciones en proceso)
+    APIM --> FrontEnd : Error 409
+    FrontEnd -> FrontEnd : Mostrar mensaje
+    note right of FrontEnd
+    Título: No pudimos eliminar el esquema de aprobación
+    Texto: Se tienen transacciones pendientes de aprobación. Inténtalo más tarde
+    end note
+end
+
+' == Flujo alterno (Errores generales) ==
+group Error general
+    Approvals --> APIM : Error 500
+    APIM --> FrontEnd : Error 500
+    FrontEnd -> FrontEnd : Mostrar mensaje
+    note right of FrontEnd
+    Título: No pudimos eliminar el esquema de aprobación
+    Texto: Inténtalo más tarde
+    end note
+
+    FrontEnd -> AuditLog : Registrar intento fallido
+    note right of AuditLog
+    Acción: Error al eliminar esquema
+    end note
+end
+
+@enduml

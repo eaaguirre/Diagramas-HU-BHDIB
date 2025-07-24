@@ -1,0 +1,97 @@
+@startuml
+title Detalle de Cuenta - HU 833106
+
+' == Actores y Sistemas ==
+actor Usuario as FrontEnd  #99ccff
+participant "PIM Management (APIM)" as APIM <<API Gateway>> #ccffcc
+participant "BHFDIB.MS.Accounts (Backend)" as Backend <<Microservicio BFF>> #ffcccc
+participant "Servicio Core Bancario" as Core <<External Service>> #ffffcc
+participant "Servicio Master Data" as MasterData <<Homologación>> #ccffff
+database "Log Auditoría" as AuditLog <<Logging>> #ccccff
+
+' == Flujo principal (Success Path) ==
+== El usuario consulta el detalle de la cuenta ==
+
+FrontEnd -> APIM : POST /api/bhd/accounts/detail\nBody(JSON):\n{\n  "IdentificationType": "C",\n  "IdentificationNumber": "123456",\n  "AccountNumber": "0123456789"\n}
+note right of FrontEnd
+El Frontend envía un POST con el JSON Body
+que incluye:
+- IdentificationType
+- IdentificationNumber
+- AccountNumber
+end note
+
+APIM -> Backend : POST /api/banca-linea/accounts/detail\nBody(JSON)
+note right of APIM
+APIM enruta la petición al BFF (Backend For Frontend)
+sin modificar el payload.
+end note
+
+Backend -> Core : POST /accounts/detail\nBody(JSON)
+note right of Backend
+El Backend reenvía la solicitud al Core Bancario
+para obtener los datos  de la cuenta.
+end note
+
+Core --> Backend : JSON Detalle Cuenta
+note right of Core
+Incluye datos completos: cliente, saldo, moneda, etc.
+end note
+
+Backend -> MasterData : GET /homologacion/moneda?codigo=USD
+note right of Backend
+El Backend consulta al servicio Master Data para
+homologar el código de moneda recibido del Core.
+end note
+
+MasterData --> Backend : JSON Moneda Homologada
+Backend -> Backend : Mapear respuesta final
+note right of Backend
+Combina datos del Core y homologación de moneda.
+Transforma el JSON para el Frontend.
+end note
+
+Backend --> APIM : JSON Detalle Cuenta (simplificado)
+APIM --> FrontEnd : JSON Detalle Cuenta (simplificado)
+
+note right of FrontEnd
+El Frontend renderiza el formulario "Detalle Cuenta"
+mostrando únicamente los campos definidos por la HU:
+- Nombre del producto (editable)
+- Número de cuenta
+- Condición
+- Saldo, disponible, bloqueos
+- Fechas, moneda homologada, intereses
+end note
+
+FrontEnd -> AuditLog : Registrar acción
+note right of AuditLog
+Datos auditados:
+- Usuario
+- IP
+- Fecha/Hora
+- Acción: Consulta Detalle Cuenta
+- Alias personalizado (si aplica)
+end note
+
+' == Flujo alterno (Error al consultar detalle) ==
+== Si ocurre un error en cualquier punto ==
+
+group Error al cargar detalle
+    Core --> Backend : Error (Timeout / Code)
+    Backend --> APIM : Error 500 / Timeout
+    APIM --> FrontEnd : Error 500 / Timeout
+    FrontEnd -> FrontEnd : Mostrar mensaje
+    note right of FrontEnd
+    "No pudimos cargar los datos de tu cuenta.
+    Verifica tu conexión o intenta recargar la página.
+    Si el problema continúa, inténtalo más tarde."
+    end note
+
+    FrontEnd -> AuditLog : Registrar intento fallido
+    note right of AuditLog
+    Acción: Error al consultar detalle cuenta
+    end note
+end
+
+@enduml

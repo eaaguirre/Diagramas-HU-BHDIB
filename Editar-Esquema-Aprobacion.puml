@@ -1,0 +1,66 @@
+@startuml
+title Editar Esquema de Aprobación - HU 833136
+
+' == Actores y Sistemas ==
+actor Usuario as FrontEnd  #99ccff
+participant "PIM Management (APIM)" as APIM <<API Gateway>> #ccffcc
+participant "BHDIB.MS.Approvals (Backend)" as Approvals <<Microservicio>> #ffffcc
+participant "Servicio OTP" as OTP <<Security Service>> #cccc99
+database "Base de Datos Aprobaciones" as DB <<Database>> #ccccff
+database "Log Auditoría" as AuditLog <<Logging>> #ccccff
+
+' == Flujo principal (Success Path) ==
+== Usuario inicia edición de esquema ==
+
+FrontEnd -> APIM : PATCH /api/banca-linea/approval-flows\nBody(JSON): {esquemaModificado}
+note right of FrontEnd
+Frontend envía el PATCH con los datos modificados
+y el ID del flujo de aprobación a editar.
+end note
+
+APIM -> Approvals : PATCH /api/v1/approval-flows\nBody(JSON): {esquemaModificado}
+note right of APIM
+APIM enruta la petición al microservicio Approvals.
+end note
+
+== Validaciones Backend ==
+Approvals -> DB : Validar si existen transacciones pendientes
+DB --> Approvals : Resultado de validación
+
+alt No hay transacciones pendientes
+    == Validar OTP ==
+    Approvals -> OTP : Validar OTP(token)
+    OTP --> Approvals : Resultado validación (OK)
+    
+    == Persistir cambios ==
+    Approvals -> DB : Actualizar esquema de aprobación
+    DB --> Approvals : Confirmación actualización
+    Approvals --> APIM : JSON Confirmación edición
+    APIM --> FrontEnd : JSON Confirmación edición
+    
+    note right of FrontEnd
+    Muestra mensaje:
+    “La edición del esquema de aprobación ha sido realizada”
+    Botón: "Entendido"
+    end note
+
+    FrontEnd -> AuditLog : Registrar acción
+    note right of AuditLog
+    Datos auditados:
+    - Usuario
+    - IP
+    - Fecha/Hora
+    - Acción: Modificación Esquema Aprobación
+    end note
+
+else Existen transacciones pendientes
+    Approvals --> APIM : Error 409 (Transacciones en proceso)
+    APIM --> FrontEnd : Error 409
+    FrontEnd -> FrontEnd : Mostrar mensaje
+    note right of FrontEnd
+    “No pudimos editar el esquema de aprobación.
+    Se tienen transacciones pendientes de aprobación.”
+    end note
+end
+
+@enduml

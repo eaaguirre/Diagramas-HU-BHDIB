@@ -1,0 +1,110 @@
+@startuml Consulta de Beneficiarios
+!theme plain
+skinparam backgroundColor #fafafa
+skinparam defaultFontName 'Segoe UI', Arial, sans-serif
+skinparam defaultFontSize 11
+skinparam roundcorner 8
+
+title <color:#1a237e><size:16><b>Diagrama de Flujo - Consulta de Beneficiarios</b></size></color>
+
+start
+:Usuario accede a "Beneficiarios";
+note right #e3f2fd : <b>Navegación:</b><br/>Menú → Transacciones y cheques → Beneficiarios
+
+if (Usuario autorizado?) then (Sí)
+    :Frontend envía GET /api/beneficiaries;
+    note right #f3e5f5 : <b>Parámetros:</b><br/>• Filtros (tipo, búsqueda, estado)<br/>• Paginación (página, tamaño=10)
+    
+    :WebApi - Endpoint recibe request;
+    
+    :Validar parámetros de filtro y paginación;
+    
+    if (Parámetros válidos?) then (Sí)
+        :Registrar auditoría - Consulta iniciada;
+        note right #fff8e1 : <b>Auditoría:</b><br/>• Usuario<br/>• IP del dispositivo<br/>• Fecha y hora<br/>• Tipo de acción
+        
+        :Application - Handler procesa request;
+        
+        :Construir filtros de consulta;
+        
+        if (¿Filtro por tipo?) then (Todos)
+            :Consultar ambos tipos de beneficiarios;
+        elseif (BHDIB) then
+            :Consultar solo BeneficiaryBhd;
+        elseif (Internacional) then
+            :Consultar solo InternationalBeneficiary;
+        endif
+        
+        :Infrastructure - Repository ejecuta consulta;
+        
+        :Database - PostgreSQL ejecuta query;
+        
+        if (¿Error en consulta?) then (Sí)
+            :Error 500 - No pudimos consultar los beneficiarios;
+            :Registrar auditoría - Error;
+            :Frontend muestra error con botón "Entendido";
+            stop
+        else (No)
+            :Obtener resultados paginados;
+            
+            :Application - Mapear entidades a DTOs;
+            note right #e8f5e8 : <b>Mapeo:</b><br/>• UUID → últimos 5 caracteres<br/>• Entidades → DTOs de respuesta
+            
+            :Construir respuesta con paginación;
+            
+            :Registrar auditoría - Consulta exitosa;
+            
+            if (¿Hay beneficiarios?) then (No)
+                :Response: "Aún no hay beneficiarios inscritos";
+                :Frontend muestra mensaje informativo;
+            else (Sí)
+                :Response: Lista de beneficiarios con paginación;
+                :Frontend renderiza tabla;
+                note right #e8f5e8 : <b>Campos mostrados:</b><br/>• Código beneficiario (5 chars)<br/>• Nombre beneficiario<br/>• Alias<br/>• Tipo (BHDIB/Internacional)<br/>• Producto<br/>• Número de producto<br/>• Estado<br/>• Acciones (Editar/Eliminar)
+                
+                :Usuario puede filtrar/buscar;
+                note right #fff8e1 : <b>Filtros inteligentes:</b><br/>• Todo, BHDIB, Internacional<br/>• Búsqueda por campos<br/>• Paginación automática
+            endif
+        endif
+        
+    else (No)
+        :Error 400 - Parámetros inválidos;
+        :Frontend muestra error de validación;
+    endif
+    
+else (No)
+    :Error 403 - Acceso denegado;
+    :Frontend muestra error de autorización;
+endif
+
+stop
+
+' ===== ESTILOS BÁSICOS =====
+skinparam activity {
+    BackgroundColor #ffffff
+    BorderColor #37474f
+    FontColor #263238
+    FontStyle bold
+}
+
+skinparam activityDiamond {
+    BackgroundColor #f5f5f5
+    BorderColor #546e7a
+    FontColor #37474f
+    FontStyle bold
+}
+
+skinparam note {
+    BackgroundColor #fafafa
+    BorderColor #90a4ae
+    FontColor #37474f
+    FontStyle italic
+}
+
+skinparam title {
+    FontColor #1a237e
+    FontStyle bold
+    FontSize 16
+}
+
+@enduml

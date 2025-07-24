@@ -1,0 +1,66 @@
+@startuml
+title Consultar Detalle Esquema de Aprobación - HU 833134
+
+' == Actores y Sistemas ==
+actor Usuario as FrontEnd  #99ccff
+participant "PIM Management (APIM)" as APIM <<API Gateway>> #ccffcc
+participant "BHDIB.MS.Approvals (Backend)" as Approvals <<Microservicio>> #ffffcc
+database "Base de Datos Aprobaciones" as DB <<Database>> #ccccff
+database "Log Auditoría" as AuditLog <<Logging>> #ccccff
+
+' == Flujo principal (Success Path) ==
+== Usuario consulta detalle de esquema ==
+
+FrontEnd -> APIM : GET /api/banca-linea/approvals/{flowId}
+note right of FrontEnd
+Frontend solicita el detalle del esquema 
+de aprobación por su flowId.
+end note
+
+APIM -> Approvals : GET /api/v1/approval-flows/GetDetail/{flowId}
+note right of APIM
+APIM enruta la petición al microservicio Approvals.
+end note
+
+Approvals -> DB : Consultar detalle esquema (flowId)
+DB --> Approvals : JSON detalle esquema completo
+
+Approvals --> APIM : JSON detalle esquema
+APIM --> FrontEnd : JSON detalle esquema
+
+note right of FrontEnd
+Muestra los datos del esquema:
+- Nombre
+- Transacciones
+- Cuentas
+- Montos
+- Aprobadores (niveles e independientes)
+- Fecha de creación/modificación
+end note
+
+FrontEnd -> AuditLog : Registrar acción
+note right of AuditLog
+Datos auditados:
+- Usuario
+- IP
+- Fecha/Hora
+- Acción: Consulta Detalle Esquema
+end note
+
+' == Flujo alterno (Errores) ==
+group Error al consultar detalle
+    Approvals --> APIM : Error 500 / Timeout
+    APIM --> FrontEnd : Error 500 / Timeout
+    FrontEnd -> FrontEnd : Mostrar mensaje
+    note right of FrontEnd
+    “No pudimos consultar el detalle de un esquema.
+    Inténtalo más tarde.”
+    end note
+
+    FrontEnd -> AuditLog : Registrar intento fallido
+    note right of AuditLog
+    Acción: Error al consultar detalle esquema
+    end note
+end
+
+@enduml

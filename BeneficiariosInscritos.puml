@@ -1,0 +1,66 @@
+@startuml
+title Consultar Beneficiarios Inscritos - HU Beneficiarios
+
+' == Actores y Sistemas ==
+actor Usuario as FrontEnd  #99ccff
+participant "API Management (APIM)" as APIM <<API Gateway>> #ccffcc
+participant "BHDIB.MS.Beneficiaries (Backend)" as Beneficiaries <<Microservicio>> #ffffcc
+database "Base de Datos Beneficiarios" as DB <<Database>> #ccccff
+database "Log Auditoría" as AuditLog <<Logging>> #ccccff
+
+' == Flujo principal ==
+== Usuario accede a Beneficiarios ==
+
+FrontEnd -> APIM : GET /api/banca-linea/beneficiaries/enrolled?customerId={id}
+note right of FrontEnd
+El usuario accede a la opción de Beneficiarios.
+Se lanza petición con el customerId desde el Front.
+end note
+
+APIM -> Beneficiaries : GET /api/v1/beneficiaries/enrolled?customerId={id}
+note right of APIM
+APIM enruta la solicitud al microservicio Beneficiaries.
+end note
+
+Beneficiaries -> DB : Consultar beneficiarios BHD e Internacionales
+DB --> Beneficiaries : Datos de ambas fuentes unificados
+
+Beneficiaries --> APIM : Lista completa de beneficiarios
+APIM --> FrontEnd : Lista de beneficiarios en JSON
+
+note right of FrontEnd
+Se muestra la tabla de beneficiarios con:
+- Código
+- Nombre
+- Alias
+- Tipo (BHDIB / Internacional)
+- Producto y número (si aplica)
+- Estado
+- Acciones (editar/eliminar)
+end note
+
+FrontEnd -> AuditLog : Registrar acción de consulta
+note right of AuditLog
+- Usuario
+- IP
+- Fecha/Hora
+- Acción: Consultar Beneficiarios
+end note
+
+' == Flujo alterno ==
+group Error en la consulta
+    Beneficiaries --> APIM : Error 500 / Timeout
+    APIM --> FrontEnd : Error 500 / Timeout
+    FrontEnd -> FrontEnd : Mostrar mensaje
+    note right of FrontEnd
+    “No pudimos consultar los beneficiarios.
+    Inténtalo más tarde.”
+    end note
+
+    FrontEnd -> AuditLog : Registrar intento fallido
+    note right of AuditLog
+    Acción: Error al consultar beneficiarios
+    end note
+end
+
+@enduml

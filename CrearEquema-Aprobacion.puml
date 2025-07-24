@@ -1,0 +1,95 @@
+@startuml
+title Crear Esquema de Aprobación - HU 833135
+
+' == Actores y Sistemas ==
+actor Usuario as FrontEnd  #99ccff
+participant "PIM Management (APIM)" as APIM <<API Gateway>> #ccffcc
+participant "BHDIB.MS.BFF.BEL (BFF)" as BFF <<Backend For Frontend>> #ffcccc
+participant "BHDIB.MS.Approvals" as Approvals <<Microservicio>> #ffffcc
+participant "Servicio Core Bancario" as Core <<External Service>> #ccffff
+participant "Usuarios Cliente Privilegios" as ClientUsers <<Microservicio>> #ffcc99
+participant "Servicio OTP" as OTP <<Security Service>> #cccc99
+database "Base de Datos Aprobaciones" as DB <<Database>> #ccccff
+database "Log Auditoría" as AuditLog <<Logging>> #ccccff
+
+' == Flujo principal (Success Path) ==
+== Usuario inicia creación de esquema ==
+
+FrontEnd -> APIM : GET /api/banca-linea/approvals/data
+note right of FrontEnd
+Frontend solicita datos iniciales
+para cargar el formulario.
+end note
+
+APIM -> BFF : GET /api/banca-linea/approvals/data
+note right of APIM
+APIM enruta la petición al BFF.
+end note
+
+== BFF orquesta llamadas ==
+
+par Consultar tipos de transacción
+    BFF -> Approvals : GET /api/v1/transaction-types
+end
+
+par Consultar usuarios con privilegios
+    BFF -> ClientUsers : GET /api/v1/clients-users-privileges/{clientId}
+end
+
+par Consultar productos del cliente
+    BFF -> Core : GET /api/bhd/customer/products
+end
+
+Approvals --> BFF : JSON tipos transacción
+ClientUsers --> BFF : JSON usuarios cliente
+Core --> BFF : JSON productos cliente
+
+BFF -> BFF : Combinar datos y mapear formato Frontend
+BFF --> APIM : JSON datos iniciales formulario
+APIM --> FrontEnd : JSON datos iniciales formulario
+
+== Usuario diligencia formulario y valida datos ==
+
+FrontEnd -> FrontEnd : Validar campos obligatorios
+FrontEnd -> OTP : Solicitar validación OTP
+OTP --> FrontEnd : Resultado validación (OK)
+
+== Crear esquema de aprobación ==
+
+FrontEnd -> APIM : POST /api/transactions-approvals/approval-flows\nBody(JSON): {esquema}
+APIM -> Approvals : POST /api/v1/approval-flows\nBody(JSON): {esquema}
+Approvals -> DB : Persistir esquema
+DB --> Approvals : Confirmación persistencia
+
+Approvals --> APIM : JSON Confirmación creación
+APIM --> FrontEnd : JSON Confirmación creación
+
+note right of FrontEnd
+Muestra mensaje:
+“La creación del esquema de aprobación ha sido realizada”
+Botón: "Entendido"
+end note
+
+FrontEnd -> AuditLog : Registrar acción
+note right of AuditLog
+Datos auditados:
+- Usuario
+- IP
+- Fecha/Hora
+- Acción: Creación Esquema Aprobación
+end note
+
+' == Flujo alterno (Errores) ==
+group Error validación OTP
+    OTP --> FrontEnd : Error Token inválido
+    FrontEnd -> FrontEnd : Mostrar mensaje de error y permitir reintento
+end
+
+group Error al crear esquema
+    Approvals --> APIM : Error 500
+    APIM --> FrontEnd : Error 500
+    FrontEnd -> FrontEnd : Mostrar mensaje:
+    'No pudimos crear el esquema de aprobación. Inténtalo más tarde.'
+end
+
+@enduml

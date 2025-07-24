@@ -1,0 +1,79 @@
+@startuml
+title Detalle del Certificado - HU 889970
+
+' == Actores y Sistemas ==
+actor Usuario as FrontEnd  #99ccff
+participant "PIM Management (APIM)" as APIM <<API Gateway>> #ccffcc
+participant "BHFDIB.MS.Investment" as Backend <<Microservicio>> #ffcccc
+participant "Servicio Core Bancario" as Core <<External Service>> #ffffcc
+database "Log Auditoría" as AuditLog <<Logging>> #ccccff
+
+' == Flujo principal (Success Path) ==
+== El usuario consulta el detalle del certificado ==
+
+FrontEnd -> APIM : POST /api/banca-linea/investments/detail
+note right of FrontEnd
+El Frontend envía POST con el JSON Body al APIM.
+end note
+
+APIM -> Backend : POST /api/banca-linea/investments/detail\nBody(JSON)
+note right of APIM
+APIM enruta la petición al microservicio BHFDIB.MS.Investment
+sin modificar el payload.
+end note
+
+Backend -> Core : POST /certificates/detail\nBody(JSON)
+note right of Backend
+El Backend reenvía la solicitud al Core Bancario.
+end note
+
+Core --> Backend : JSON Detalle Certificado (raw)
+note right of Core
+Incluye header + detail.success con todos
+los campos del certificado.
+end note
+
+Backend -> Backend : Mapea respuesta Core a formato Frontend
+Backend --> APIM : JSON Detalle Certificado (simplificado)
+APIM --> FrontEnd : JSON Detalle Certificado (simplificado)
+
+note right of FrontEnd
+Frontend renderiza la pantalla mostrando:
+- Número de Certificado
+- Nombre del Cliente
+- Condición
+- Balance
+- Fechas
+- Tasa de Interés, etc.
+end note
+
+FrontEnd -> AuditLog : Registrar acción
+note right of AuditLog
+Datos auditados:
+- Usuario
+- IP
+- Fecha/Hora
+- Acción: Consulta Detalle Certificado
+end note
+
+' == Flujo alterno (Error al consultar detalle) ==
+== Si ocurre un error en cualquier punto ==
+
+group Error al cargar detalle
+    Core --> Backend : Error (Timeout / Code)
+    Backend --> APIM : Error 500 / Timeout
+    APIM --> FrontEnd : Error 500 / Timeout
+    FrontEnd -> FrontEnd : Mostrar mensaje
+    note right of FrontEnd
+    "No pudimos cargar los datos de tu certificado.
+    Verifica tu conexión o intenta recargar la página.
+    Si el problema continúa, inténtalo más tarde."
+    end note
+
+    FrontEnd -> AuditLog : Registrar intento fallido
+    note right of AuditLog
+    Acción: Error al consultar detalle certificado
+    end note
+end
+
+@enduml
