@@ -1,0 +1,33 @@
+@startuml
+start
+:Recibir datos de la Solicitud;
+
+:Validar reglas de negocio
+(monto, tipo transacción,
+rol del usuario, etc.);
+
+:Iniciar Transacción DB;
+
+:Insertar Solicitud en tabla solicitudes
+(Estado = En proceso / Pendiente);
+
+if (¿Existen flujos aplicables?) then (Sí)
+  :Obtener lista de Flujos aplicables;
+
+  :Insertar registros en
+  SolicitudesAprobacion
+  (SolicitudId, FlujoId, Orden, EstadoPaso=PENDIENTE);
+
+else (No)
+  :No se insertan flujos;
+  :Actualizar Estado de Solicitud
+  (ej. = Aprobada Automáticamente);
+endif
+
+:Guardar cambios;
+:Commit Transacción;
+:Retornar Id de Solicitud
++ info de flujos (si existen);
+
+stop
+@enduml

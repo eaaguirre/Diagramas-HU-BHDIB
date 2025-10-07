@@ -1,0 +1,93 @@
+@startuml
+title Procesamiento de Transacciones (composición de políticas)
+
+skinparam packageStyle rectangle
+skinparam classAttributeIconSize 0
+
+interface ICoreIntegration {
+  +Execute(tx): Result
+}
+
+interface IOnlineProcessing {
+  +Execute(tx): Result
+}
+
+interface IOperativeProcessing {
+  +Execute(tx): Result
+}
+
+class TransactionProcessor {
+  - core: ICoreIntegration
+  - online: IOnlineProcessing
+  - operative: IOperativeProcessing
+  + Process(tx): Result
+}
+
+' Implementaciones (Yes/No) -> Strategy + Null Object
+class CoreIntegrationYes
+class CoreIntegrationNo <<null>>
+class OnlineProcessingYes
+class OnlineProcessingNo <<null>>
+class OperativeProcessYes
+class OperativeProcessNo <<null>>
+
+TransactionProcessor *-- ICoreIntegration : usa
+TransactionProcessor *-- IOnlineProcessing : usa
+TransactionProcessor *-- IOperativeProcessing : usa
+
+ICoreIntegration <|.. CoreIntegrationYes
+ICoreIntegration <|.. CoreIntegrationNo
+IOnlineProcessing <|.. OnlineProcessingYes
+IOnlineProcessing <|.. OnlineProcessingNo
+IOperativeProcessing <|.. OperativeProcessYes
+IOperativeProcessing <|.. OperativeProcessNo
+
+' Tipos de transacción como configuraciones
+class BZLC
+class "BHDIB (entre cuentas)" as BHDIB
+class Cheques
+class TI
+
+BZLC o-- TransactionProcessor : configura
+BHDIB o-- TransactionProcessor : configura
+Cheques o-- TransactionProcessor : configura
+TI o-- TransactionProcessor : configura
+
+note right of BZLC
+BZLC:
+- Envía Core: NO  -> CoreIntegrationNo
+- En línea:   NO  -> OnlineProcessingNo
+- Operativo:  SÍ  -> OperativeProcessYes
+end note
+
+note right of BHDIB
+BHDIB (entre cuentas):
+- Envía Core: SÍ  -> CoreIntegrationYes
+- En línea:   SÍ  -> OnlineProcessingYes
+- Operativo:  NO  -> OperativeProcessNo
+end note
+
+note right of Cheques
+Cheques:
+- Envía Core: SÍ  -> CoreIntegrationYes
+- En línea:   NO  -> OnlineProcessingNo
+- Operativo:  SÍ  -> OperativeProcessYes
+end note
+
+note right of TI
+TI:
+- Envía Core: SÍ  -> CoreIntegrationYes
+- En línea:   SÍ  -> OnlineProcessingYes
+- Operativo:  SÍ  -> OperativeProcessYes
+end note
+
+' Leyenda tipo matriz
+legend left
+| Tipo trx                | Envía Core | En línea | Operativo |
+|------------------------ |-----------:|---------:|----------:|
+| BZLC                    | NO         | NO       | SI        |
+| BHDIB (entre cuentas)   | SI         | SI       | NO        |
+| Cheques                 | SI         | NO       | SI        |
+| TI                      | SI         | SI       | SI        |
+endlegend
+@enduml

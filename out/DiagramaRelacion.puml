@@ -1,0 +1,75 @@
+@startuml
+entity "SOLICITUDES" as Solicitudes {
+  * id : uuid <<PK>>
+  --
+  tipo_transaccion_id : int
+  usuario_bel_id : uuid
+  fecha_solicitud : timestamp
+  estado_id : int <<FK>>
+  monto : numeric
+  cuenta_debito : varchar
+  data : bytea/varbinary
+  iv : bytea/varbinary
+  fecha_envio_core : timestamp
+  respuesta_core : bytea/varbinary
+}
+
+entity "ESTADOS_SOLICITUD" as Estados {
+  * id : int <<PK>>
+  --
+  codigo : varchar
+  nombre : varchar
+  es_final : bool
+}
+
+entity "FLUJOS" as Flujos {
+  * id : bigint <<PK>>
+  --
+  nombre : varchar
+  activo : bool
+  descripcion : varchar
+}
+
+entity "FLUJO_PASOS" as FlujoPasos {
+  * id : bigint <<PK>>
+  --
+  flujo_id : bigint <<FK>>
+  orden : int
+  regla_rol : varchar
+  umbral_desde : numeric
+  umbral_hasta : numeric
+}
+
+entity "SOLICITUDES_FLUJO" as SolFlujo {
+  * solicitud_id : uuid <<PK,FK>>
+  * flujo_id : bigint <<PK,FK>>
+  --
+  orden : int
+  estado_paso : int
+  fecha_creacion : timestamp
+}
+
+entity "APROBACIONES" as Aprobaciones {
+  * id : bigserial <<PK>>
+  --
+  solicitud_id : uuid <<FK>>
+  flujo_id : bigint <<FK>>
+  orden_paso : int
+  aprobador_id : uuid <<FK>>
+  decision : int
+  fecha_decision : timestamp
+  comentario : varchar
+}
+
+entity "USUARIOS" as Usuarios {
+  * id : uuid <<PK>>
+  --
+  nombre : varchar
+}
+
+Estados ||--o{ Solicitudes : "1..N"
+Solicitudes ||--o{ SolFlujo : "1..N"
+Flujos ||--o{ SolFlujo : "1..N"
+Flujos ||--o{ FlujoPasos : "1..N"
+FlujoPasos ||--o{ Aprobaciones : "1..N"
+Solicitudes ||--o{ Aprobaci

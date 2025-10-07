@@ -1,0 +1,77 @@
+
+@startuml HU-907063
+title Gestión de Usuario BEL - Creación/Edición y Acciones Directas
+
+actor "Asesor BO" as BO #99ccff
+participant "Front BO" as Front #ccffcc
+participant "BFF-BO" as BFF #ccccff
+participant "Auth-BEL" as Auth #ffcccc
+database "DB Auth-BEL" as DB #ffffcc
+
+== 1. Creación/Edición Usuario PN (Super Usuario) ==
+
+BO -> Front : Completa formulario usuario PN (marca Super Usuario)
+Front -> BFF : Solicita creación/edición usuario (Super Usuario, todos permisos)
+BFF -> Auth : Crear/Editar usuario (Super Usuario, todos permisos)
+Auth -> DB : Guarda usuario con todos permisos
+DB --> Auth : OK
+Auth --> BFF : OK
+BFF --> Front : OK
+Front -> Front : Bloquea toggles y checks de permisos
+
+== 2. Edición Usuario PN (Desmarcar Super Usuario) ==
+
+BO -> Front : Desmarca Super Usuario en edición
+Front -> Front : Desbloquea toggles y checks de permisos
+Front -> BFF : Solicita edición usuario (permisos seleccionados)
+BFF -> Auth : Editar usuario (permisos seleccionados)
+Auth -> DB : Actualiza permisos usuario
+DB --> Auth : OK
+Auth --> BFF : OK
+BFF --> Front : OK
+
+== 3. Creación/Edición Usuario PJ (Rol/Macroperfil Opcional) ==
+
+BO -> Front : Completa formulario usuario PJ (Rol/Macroperfil opcional)
+Front -> BFF : Solicita creación/edición usuario (sin rol/macroperfil)
+BFF -> Auth : Crear/Editar usuario (sin rol/macroperfil)
+Auth -> DB : Guarda usuario sin rol/macroperfil
+DB --> Auth : OK
+Auth --> BFF : OK
+BFF --> Front : OK
+
+== 4. Login Usuario PJ sin Rol ==
+
+Front -> BFF : Solicita menú usuario PJ
+BFF -> Auth : Obtener permisos usuario PJ
+Auth -> DB : Consulta usuario PJ
+DB --> Auth : Sin rol asignado
+Auth --> BFF : Permisos mínimos (Home, Más > Documentos/Formularios)
+BFF --> Front : Renderiza menú limitado
+
+== 5. CTA en Edición de Usuario ==
+
+Front -> Front : Muestra formulario edición usuario (con CTA)
+Front -> BO : Clic en "Ver clientes asociados"
+Front -> Front : Redirige a pantalla de clientes asociados (HU 833330)
+
+Front -> BO : Clic en "Recuperar contraseña"
+Front -> Front : Muestra modal de recuperación (HU 833332)
+
+Front -> BO : Clic en "Eliminar usuario"
+Front -> Front : Muestra alerta de eliminación (HU 833328)
+
+== 6. Nueva Funcionalidad ==
+
+BO -> Front : Clic en "Nueva acción"
+Front -> Front : Muestra opciones de nueva acción
+Front -> BO : Selecciona opción y completa detalles
+Front -> BFF : Solicita ejecución de nueva acción
+BFF -> Auth : Ejecutar nueva acción
+Auth -> DB : Procesa nueva acción
+DB --> Auth : OK
+Auth --> BFF : OK
+BFF --> Front : OK
+Front -> Front : Muestra resultado de la acción
+
+@enduml

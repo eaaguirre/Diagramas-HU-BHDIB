@@ -1,0 +1,95 @@
+@startuml
+title Orquestación de Productos Cliente y Registro en Auth-Bel
+
+actor Usuario as FrontEnd #99ccff
+participant "BFF-BO" as BFF #ccffcc
+participant "Core Productos Clientes" as Core #ffffcc
+participant "Auth-Bel" as Auth #ffcccc
+database "Log Auditoría" as AuditLog #ccccff
+
+== El usuario consulta productos asociados ==
+
+FrontEnd -> BFF : Solicita productos por código de cliente
+note right of FrontEnd
+El usuario solicita ver los productos asociados
+a un cliente específico.
+end note
+
+BFF -> Core : Obtener productos asociados (código de cliente)
+note right of BFF
+BFF-BO consulta al Core los productos
+del cliente por su código.
+end note
+
+Core --> BFF : Retorna productos asociados
+note right of Core
+Core responde con la lista de productos
+asociados al cliente.
+end note
+
+BFF -> Auth : Registrar productos asociados al usuario
+note right of BFF
+BFF-BO envía los productos y usuario
+a Auth-Bel para registrar la asociación.
+end note
+
+Auth --> BFF : Confirmación de registro
+BFF --> FrontEnd : Responde con resultado
+
+note right of FrontEnd
+El FrontEnd muestra los productos asociados
+y el resultado del registro.
+end note
+
+FrontEnd -> AuditLog : Registrar acción
+note right of AuditLog
+Datos auditados:
+- Usuario
+- Código de Cliente
+- Productos asociados
+- Fecha/Hora
+- Acción: Consulta y registro de productos
+end note
+
+== Nuevo flujo: El usuario vuelve a consultar productos ==
+
+FrontEnd -> BFF : Volver a consultar productos por código de cliente
+note right of FrontEnd
+El usuario solicita nuevamente los productos
+asociados al cliente.
+end note
+
+BFF -> Core : Obtener productos asociados (código de cliente)
+Core --> BFF : Retorna productos asociados
+BFF --> FrontEnd : Muestra productos actualizados
+
+note right of FrontEnd
+El FrontEnd muestra la lista actualizada
+de productos asociados al cliente.
+end note
+
+FrontEnd -> AuditLog : Registrar acción de nueva consulta
+note right of AuditLog
+Datos auditados:
+- Usuario
+- Código de Cliente
+- Fecha/Hora
+- Acción: Nueva consulta de productos
+end note
+
+== Flujo alterno (Error en la orquestación) ==
+
+group Error en la consulta o registro
+    Core --> BFF : Error (Timeout / Code)
+    BFF --> FrontEnd : Error 500 / Timeout
+    FrontEnd -> FrontEnd : Mostrar mensaje de error
+    note right of FrontEnd
+    "No fue posible consultar o registrar los productos.
+    Intenta nuevamente más tarde."
+    end note
+
+    FrontEnd -> AuditLog : Registrar intento fallido
+    note right of AuditLog
+    Acción: Error en consulta/registro de productos
+    end note
+end

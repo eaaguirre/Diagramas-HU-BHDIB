@@ -1,0 +1,35 @@
+@startuml
+title Flujo genérico de procesamiento (pasos opcionales por configuración)
+
+participant "API/Orquestador" as API
+participant "TransactionProcessor" as PROC
+participant "Core" as CORE
+participant "Proceso Operativo" as OPS
+
+API -> PROC: Process(tx)
+
+opt Enviar a Core [si CoreIntegrationYes]
+  PROC -> CORE: crear/registrar transferencia(tx)
+  CORE --> PROC: respuesta (inmediata o estado previo)
+end
+
+opt Procesar en línea [si OnlineProcessingYes]
+  PROC -> CORE: confirmar/commit inmediato
+  PROC --> API: respuesta final en línea
+end
+
+opt Proceso Operativo [si OperativeProcessYes]
+  PROC -> OPS: encolar tarea / disparar workflow\n(back-office / batch / manual)
+  OPS --> PROC: acuse/resultado diferido
+end
+
+PROC --> API: resultado (según configuración)
+
+note right
+Ejemplos:
+- BZLC: solo bloque "Proceso Operativo".
+- BHDIB: "Enviar a Core" + "En línea".
+- Cheques: "Enviar a Core" + "Operativo".
+- TI: los tres bloques.
+end note
+@enduml

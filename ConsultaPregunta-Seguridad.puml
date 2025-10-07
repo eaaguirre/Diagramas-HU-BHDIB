@@ -1,0 +1,32 @@
+@startuml ConsultaPreguntaSeguridad
+title Obtener Pool de Preguntas de Seguridad - HU Recuperación de Contraseña
+
+' == Actores y Sistemas ==
+actor Usuario as FrontEnd #99ccff
+participant "API Management (APIM)\n{{base_url}}/api/channel-management/customer-access-entitlement/security-questions/all" as APIM <<API Gateway>> #ccffcc
+participant "Servicio Preguntas Banco" as BancoService <<Servicio Banco>> #ffffcc
+
+' == Flujo principal ==
+== Usuario solicita preguntas de seguridad ==
+
+FrontEnd -> APIM : GET https://fls-dev.app.noprod.cfbhd.com
+note right of FrontEnd
+El usuario inicia recuperación de contraseña y no tiene preguntas registradas.
+Se solicita el pool de preguntas.
+end note
+
+APIM -> BancoService : POST /api/banco/preguntas-seguridad/pool
+note right of APIM
+Body:
+{
+  "sentenceId": "GET_ALL_QUESTIONS"
+}
+end note
+
+BancoService --> APIM : Lista de 15 preguntas de seguridad
+APIM --> FrontEnd : Lista de preguntas (JSON)
+
+note right of FrontEnd
+Se muestran 15 preguntas al usuario.
+El usuario debe seleccionar 3 de las 5 a configurar.
+end note
