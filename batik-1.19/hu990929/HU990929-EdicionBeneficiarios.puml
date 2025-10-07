@@ -1,0 +1,50 @@
+@startuml
+title Gestión de Beneficiario Internacional - Edición y Creación de Banco Intermediario
+
+actor "Usuario BEL" as Usuario #99ccff
+participant "Front BEL" as Front #ccffcc
+participant "APIM Management" as APIM #ccffcc
+participant "system_services_beneficiaries" as Beneficiaries #ffffcc
+database "BD Beneficiarios/Bancos" as DB #ccccff
+database "Log Auditoría" as AuditLog #e6e6fa
+
+== Edición: Agregar Banco Intermediario ==
+
+Usuario -> Front : Edita beneficiario internacional (sin banco intermediario)
+Front -> APIM : Solicita edición beneficiario (con banco intermediario)
+APIM -> Beneficiaries : Editar beneficiario internacional (con banco intermediario)
+Beneficiaries -> DB : Actualiza beneficiario con banco intermediario, usuario y fecha modificación
+Beneficiaries -> AuditLog : Registrar acción de edición (agregar banco intermediario)
+DB --> Beneficiaries : OK
+AuditLog --> Beneficiaries : OK
+Beneficiaries --> APIM : OK
+APIM --> Front : OK
+Front -> Usuario : Muestra confirmación edición exitosa
+
+== Edición: Quitar Banco Intermediario ==
+
+Usuario -> Front : Edita beneficiario internacional (con banco intermediario)
+Front -> APIM : Solicita edición beneficiario (sin banco intermediario)
+APIM -> Beneficiaries : Editar beneficiario internacional (sin banco intermediario)
+Beneficiaries -> DB : Actualiza beneficiario sin banco intermediario, usuario y fecha modificación
+Beneficiaries -> AuditLog : Registrar acción de edición (quitar banco intermediario)
+DB --> Beneficiaries : OK
+AuditLog --> Beneficiaries : OK
+Beneficiaries --> APIM : OK
+APIM --> Front : OK
+Front -> Usuario : Muestra confirmación edición exitosa
+
+== Creación: Banco Intermediario Opcional ==
+
+Usuario -> Front : Crea beneficiario internacional
+Front -> APIM : Solicita creación beneficiario (con/sin banco intermediario)
+APIM -> Beneficiaries : Crear beneficiario internacional (con/sin banco intermediario)
+Beneficiaries -> DB : Guarda beneficiario y banco intermediario si aplica
+Beneficiaries -> AuditLog : Registrar acción de creación beneficiario internacional
+DB --> Beneficiaries : OK
+AuditLog --> Beneficiaries : OK
+Beneficiaries --> APIM : OK
+APIM --> Front : OK
+Front -> Usuario : Muestra confirmación creación exitosa
+
+@enduml
