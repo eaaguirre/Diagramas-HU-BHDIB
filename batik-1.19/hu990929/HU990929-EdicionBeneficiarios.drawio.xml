@@ -1,0 +1,72 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36" version="28.2.3" pages="2">
+  <diagram id="HU990929" name="EdiciónBeneficiarios">
+    <mxGraphModel dx="1426" dy="743" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" value="Usuario BEL" style="ellipse;whiteSpace=wrap;html=1;fillColor=#99ccff;strokeColor=#1b1b1b;" parent="1" vertex="1">
+          <mxGeometry x="40" y="60" width="90" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="3" value="Front BEL" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ccffcc;strokeColor=#1b1b1b;" parent="1" vertex="1">
+          <mxGeometry x="180" y="40" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="4" value="APIM Management" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e6ffe6;strokeColor=#1b1b1b;" parent="1" vertex="1">
+          <mxGeometry x="360" y="40" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="5" value="system_services_beneficiaries" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffcc;strokeColor=#1b1b1b;" parent="1" vertex="1">
+          <mxGeometry x="560" y="40" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="6" value="BD Beneficiarios / Bancos" style="swimlane;whiteSpace=wrap;html=1;fillColor=#f2f2f2;strokeColor=#1b1b1b;" parent="1" vertex="1">
+          <mxGeometry x="560" y="140" width="200" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="7" value="Log Auditoría" style="cylinder;whiteSpace=wrap;html=1;fillColor=#e6e6fa;strokeColor=#1b1b1b;" parent="1" vertex="1">
+          <mxGeometry x="560" y="260" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="100" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#1b1b1b;" parent="1" source="2" target="3" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="101" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#1b1b1b;" parent="1" source="3" target="4" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="102" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#1b1b1b;" parent="1" source="4" target="5" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="103" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#1b1b1b;" parent="1" source="5" target="6" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="104" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#1b1b1b;" parent="1" source="5" target="7" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="105" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#1b1b1b;" parent="1" source="6" target="5" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="106" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=none;html=1;strokeColor=#1b1b1b;dashed=1;" parent="1" source="5" target="3" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="200" value="Edita / Crea beneficiario" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;strokeColor=none;" parent="1" vertex="1">
+          <mxGeometry x="150" y="70" width="200" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="201" value="Solicita edición/creación" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;strokeColor=none;" parent="1" vertex="1">
+          <mxGeometry x="320" y="70" width="220" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="202" value="API → Beneficiaries (editar/crear)" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;strokeColor=none;" parent="1" vertex="1">
+          <mxGeometry x="520" y="70" width="260" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="205" value="Respuesta OK / Confirmación" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;strokeColor=none;" parent="1" vertex="1">
+          <mxGeometry x="420" y="140" width="220" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="203" value="Guarda beneficiario / banco intermediario" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;strokeColor=none;" parent="1" vertex="1">
+          <mxGeometry x="640" y="160" width="240" height="20" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="0JmCOyR4vhuEfpewg2kd" name="Página-2">
+    <mxGraphModel dx="1426" dy="743" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

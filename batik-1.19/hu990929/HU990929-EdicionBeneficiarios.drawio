@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2025-10-08T00:00:00.000Z" agent="" etag="" version="14.6.13" type="device">
+  <diagram id="HU990929" name="EdiciónBeneficiarios">
+    <mxGraphModel dx="1000" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- Actor: Usuario BEL -->
+        <mxCell id="2" value="Usuario BEL" style="ellipse;whiteSpace=wrap;html=1;fillColor=#99ccff;strokeColor=#1b1b1b;" vertex="1" parent="1">
+          <mxGeometry x="40" y="60" width="90" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Front BEL -->
+        <mxCell id="3" value="Front BEL" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ccffcc;strokeColor=#1b1b1b;" vertex="1" parent="1">
+          <mxGeometry x="180" y="40" width="140" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- APIM Management -->
+        <mxCell id="4" value="APIM Management" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e6ffe6;strokeColor=#1b1b1b;" vertex="1" parent="1">
+          <mxGeometry x="360" y="40" width="160" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- system_services_beneficiaries -->
+        <mxCell id="5" value="system_services_beneficiaries" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffcc;strokeColor=#1b1b1b;" vertex="1" parent="1">
+          <mxGeometry x="560" y="40" width="200" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- BD Beneficiarios/Bancos -->
+        <mxCell id="6" value="BD Beneficiarios / Bancos" style="swimlane;whiteSpace=wrap;html=1;fillColor=#f2f2f2;strokeColor=#1b1b1b;" vertex="1" parent="1">
+          <mxGeometry x="560" y="140" width="200" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- Log Auditoría -->
+        <mxCell id="7" value="Log Auditoría" style="cylinder;whiteSpace=wrap;html=1;fillColor=#e6e6fa;strokeColor=#1b1b1b;" vertex="1" parent="1">
+          <mxGeometry x="560" y="260" width="200" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Edges: flows -->
+        <mxCell id="100" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#1b1b1b;" edge="1" parent="1" source="2" target="3">
+          <mxGeometry relative="1" as="geometry"/>
+          <mxCell id="100Label" value="Edita / Crea beneficiario" style="text;html=1;" vertex="1" parent="100">
+            <mxGeometry x="0.5" y="-20" as="geometry" relative="1"/>
+          </mxCell>
+        </mxCell>
+
+        <mxCell id="101" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#1b1b1b;" edge="1" parent="1" source="3" target="4">
+          <mxGeometry relative="1" as="geometry"/>
+          <mxCell id="101Label" value="Solicita edición/creación" style="text;html=1;" vertex="1" parent="101">
+            <mxGeometry x="0.5" y="-20" as="geometry" relative="1"/>
+          </mxCell>
+        </mxCell>
+
+        <mxCell id="102" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#1b1b1b;" edge="1" parent="1" source="4" target="5">
+          <mxGeometry relative="1" as="geometry"/>
+          <mxCell id="102Label" value="API -> Beneficiaries (editar/crear)" style="text;html=1;" vertex="1" parent="102">
+            <mxGeometry x="0.5" y="-20" as="geometry" relative="1"/>
+          </mxCell>
+        </mxCell>
+
+        <mxCell id="103" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#1b1b1b;" edge="1" parent="1" source="5" target="6">
+          <mxGeometry relative="1" as="geometry"/>
+          <mxCell id="103Label" value="Guarda beneficiario / banco intermediario" style="text;html=1;" vertex="1" parent="103">
+            <mxGeometry x="0.5" y="-20" as="geometry" relative="1"/>
+          </mxCell>
+        </mxCell>
+
+        <mxCell id="104" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#1b1b1b;" edge="1" parent="1" source="5" target="7">
+          <mxGeometry relative="1" as="geometry"/>
+          <mxCell id="104Label" value="Registra auditoría (usuario, fecha, acción)" style="text;html=1;" vertex="1" parent="104">
+            <mxGeometry x="0.5" y="-20" as="geometry" relative="1"/>
+          </mxCell>
+        </mxCell>
+
+        <mxCell id="105" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#1b1b1b;" edge="1" parent="1" source="6" target="5">
+          <mxGeometry relative="1" as="geometry"/>
+          <mxCell id="105Label" value="Respuesta OK" style="text;html=1;" vertex="1" parent="105">
+            <mxGeometry x="0.5" y="-20" as="geometry" relative="1"/>
+          </mxCell>
+        </mxCell>
+
+        <mxCell id="106" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=none;html=1;strokeColor=#1b1b1b;dashed=1;" edge="1" parent="1" source="5" target="3">
+          <mxGeometry relative="1" as="geometry"/>
+          <mxCell id="106Label" value="OK / Confirmación" style="text;html=1;" vertex="1" parent="106">
+            <mxGeometry x="0.5" y="-20" as="geometry" relative="1"/>
+          </mxCell>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

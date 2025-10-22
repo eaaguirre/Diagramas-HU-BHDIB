@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2025-10-08T00:00:00.000Z" agent="" etag="" version="14.6.13" type="device">
+  <diagram id="HU990929_native" name="HU990929 - EdiciónBeneficiarios (native)">
+    <mxGraphModel dx="1000" dy="1400" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169">
+      <root>
+  <mxCell id="1000"/>
+  <mxCell id="1001" parent="1000"/>
+
+        <!-- Participants (horizontal row) -->
+        <mxCell id="p_usuario" value="Usuario BEL" style="ellipse;whiteSpace=wrap;html=1;fillColor=#99ccff;strokeColor=#1b1b1b;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="100" height="60" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="p_front" value="Front BEL" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ccffcc;strokeColor=#1b1b1b;" vertex="1" parent="1">
+          <mxGeometry x="180" y="40" width="140" height="60" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="p_apim" value="APIM Management" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ccffcc;strokeColor=#1b1b1b;" vertex="1" parent="1">
+          <mxGeometry x="360" y="40" width="160" height="60" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="p_benef" value="system_services_beneficiaries" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffcc;strokeColor=#1b1b1b;" vertex="1" parent="1">
+          <mxGeometry x="560" y="40" width="200" height="60" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="p_db" value="BD Beneficiarios/Bancos" style="cylinder;whiteSpace=wrap;html=1;fillColor=#ccccff;strokeColor=#1b1b1b;" vertex="1" parent="1">
+          <mxGeometry x="560" y="160" width="200" height="60" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="p_audit" value="Log Auditoría" style="cylinder;whiteSpace=wrap;html=1;fillColor=#e6e6fa;strokeColor=#1b1b1b;" vertex="1" parent="1">
+          <mxGeometry x="560" y="260" width="200" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Section: Agregar Banco Intermediario (and messages) -->
+        <!-- Usuario -> Front -->
+        <mxCell id="m_1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#000000;" edge="1" parent="1" source="p_usuario" target="p_front">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="t_1" value="Edita beneficiario internacional (sin banco intermediario)" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="120" y="120" width="320" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- Front -> APIM -->
+        <mxCell id="m_2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#000000;" edge="1" parent="1" source="p_front" target="p_apim">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="t_2" value="Solicita edición beneficiario (con banco intermediario)" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="240" y="160" width="360" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- APIM -> Beneficiaries -->
+        <mxCell id="m_3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#000000;" edge="1" parent="1" source="p_apim" target="p_benef">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="t_3" value="Editar beneficiario internacional (con banco intermediario)" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="360" y="200" width="420" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- Beneficiaries -> DB -->
+        <mxCell id="m_4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#000000;" edge="1" parent="1" source="p_benef" target="p_db">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="t_4" value="Actualiza beneficiario con banco intermediario, usuario y fecha modificación" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="480" y="240" width="520" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- Beneficiaries -> AuditLog -->
+        <mxCell id="m_5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#000000;" edge="1" parent="1" source="p_benef" target="p_audit">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="t_5" value="Registrar acción de edición (agregar banco intermediario)" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="480" y="300" width="520" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- DB/Audit responses -->
+        <mxCell id="m_6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#000000;" edge="1" parent="1" source="p_db" target="p_benef">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="m_7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#000000;" edge="1" parent="1" source="p_audit" target="p_benef">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="m_8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#000000;" edge="1" parent="1" source="p_benef" target="p_apim">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="m_9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#000000;" edge="1" parent="1" source="p_apim" target="p_front">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="m_10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#000000;" edge="1" parent="1" source="p_front" target="p_usuario">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="t_resp1" value="Muestra confirmación edición exitosa" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="240" y="360" width="300" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- Section: Quitar Banco Intermediario (below previous) -->
+        <mxCell id="sep_1" value="==" style="text;html=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="40" y="420" width="720" height="20" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="m_11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#000000;" edge="1" parent="1" source="p_usuario" target="p_front">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="t_11" value="Edita beneficiario internacional (con banco intermediario)" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="120" y="460" width="320" height="20" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="m_12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#000000;" edge="1" parent="1" source="p_front" target="p_apim">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="t_12" value="Solicita edición beneficiario (sin banco intermediario)" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="240" y="500" width="360" height="20" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="m_13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#000000;" edge="1" parent="1" source="p_apim" target="p_benef">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="t_13" value="Editar beneficiario internacional (sin banco intermediario)" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="360" y="540" width="420" height="20" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="m_14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#000000;" edge="1" parent="1" source="p_benef" target="p_db">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="t_14" value="Actualiza beneficiario sin banco intermediario, usuario y fecha modificación" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="480" y="580" width="520" height="20" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="m_15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#000000;" edge="1" parent="1" source="p_benef" target="p_audit">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="t_15" value="Registrar acción de edición (quitar banco intermediario)" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="480" y="620" width="520" height="20" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="m_16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#000000;" edge="1" parent="1" source="p_db" target="p_benef">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="m_17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#000000;" edge="1" parent="1" source="p_audit" target="p_benef">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="m_18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#000000;" edge="1" parent="1" source="p_benef" target="p_apim">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="m_19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#000000;" edge="1" parent="1" source="p_apim" target="p_front">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="m_20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#000000;" edge="1" parent="1" source="p_front" target="p_usuario">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="t_resp2" value="Muestra confirmación edición exitosa" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="240" y="700" width="300" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- Section: Creación: Banco Intermediario Opcional -->
+        <mxCell id="sep_2" value="==" style="text;html=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="40" y="760" width="720" height="20" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="m_21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#000000;" edge="1" parent="1" source="p_usuario" target="p_front">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="t_21" value="Crea beneficiario internacional" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="120" y="820" width="320" height="20" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="m_22" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#000000;" edge="1" parent="1" source="p_front" target="p_apim">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="t_22" value="Solicita creación beneficiario (con/sin banco intermediario)" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="240" y="860" width="360" height="20" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="m_23" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#000000;" edge="1" parent="1" source="p_apim" target="p_benef">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="t_23" value="Crear beneficiario internacional (con/sin banco intermediario)" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="360" y="900" width="420" height="20" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="m_24" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#000000;" edge="1" parent="1" source="p_benef" target="p_db">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="t_24" value="Guarda beneficiario y banco intermediario si aplica" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="480" y="940" width="520" height="20" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="m_25" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#000000;" edge="1" parent="1" source="p_benef" target="p_audit">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="t_25" value="Registrar acción de creación beneficiario internacional" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="480" y="980" width="520" height="20" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="m_26" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#000000;" edge="1" parent="1" source="p_db" target="p_benef">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="m_27" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#000000;" edge="1" parent="1" source="p_audit" target="p_benef">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="m_28" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#000000;" edge="1" parent="1" source="p_benef" target="p_apim">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="m_29" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#000000;" edge="1" parent="1" source="p_apim" target="p_front">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="m_30" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;html=1;strokeColor=#000000;" edge="1" parent="1" source="p_front" target="p_usuario">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="t_resp3" value="Muestra confirmación creación exitosa" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="240" y="1040" width="300" height="20" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
