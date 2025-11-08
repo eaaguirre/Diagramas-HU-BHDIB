@@ -1,0 +1,104 @@
+@startuml Editar_Transaccion_HU_EditOnly
+' Estilo y colores (actores en blanco)
+skinparam backgroundColor white
+skinparam participantBackgroundColor white
+skinparam participantBorderColor black
+skinparam participantFontColor black
+skinparam actorBackgroundColor white
+skinparam actorBorderColor black
+skinparam actorFontColor black
+skinparam databaseBackgroundColor white
+skinparam databaseBorderColor black
+skinparam databaseFontColor black
+skinparam noteBackgroundColor #f9f9f9
+skinparam noteBorderColor #999999
+skinparam noteFontColor black
+
+title Edición de Transacción (solo flujo de modificación)
+
+actor Usuario
+participant "Interfaz\n(Detalle - Editar)" as UI
+participant "API Management" as APIM
+participant "BHDIBP.MS.AccountTransactions\n(Core / Microservice)" as MS
+participant "Token Component\n(CTA / 2FA)" as Token
+database "DB" as DB
+database "Historico_Cambios" as History
+participant "Application Insights\n(Telemetría/Auditoría)" as Insights
+participant "TransactionUpdateQueue\n(Message Queue)" as Queue <<queue>>
+participant "Accounts Microservice\n(Servicio Cuentas)" as Accounts
+
+note over UI
+  (Se asume que el detalle ya fue consultado y
+   el botón "Modificar" está disponible según permisos y reglas.)
+end note
+
+== Flujo de edición (compacto) ==
+Usuario -> UI: Click "Modificar"
+UI -> UI: Habilitar campos editables
+Usuario -> UI: Edita campos
+Usuario -> UI: Click "Guardar cambios"
+
+UI -> UI: Validar obligatoriedad y formato localmente
+alt Validaciones fallidas
+  UI -> Usuario: Mostrar errores por campo
+  UI -> Insights: Track "ValidationErrors" {fields}
+else Validaciones OK
+  UI -> Token: Solicitar componente token (flotante)
+  Token -> Usuario: Mostrar componente token
+  Usuario -> Token: Ingresa token
+  Token -> Token: Validar token
+  alt Token inválido
+    Token --> UI: TokenRejected
+    UI -> Usuario: Mostrar error token
+    UI -> Insights: Track "TokenRejected"
+  else Token válido
+    Token --> UI: TokenAccepted
+
+    UI -> APIM: PUT /transacciones/{id} (payload cambios)
+    APIM -> MS: PUT /transactions/{id}/update
+
+    group Validación y persistencia en MS
+      MS -> MS: Verificar reglas de negocio (estado, tipo cliente/tipo transacción)
+      alt Modificación permitida
+        MS -> DB: Actualizar datos de la transacción
+        MS -> History: Registrar cambios en histórico
+
+        alt Estado anterior = Devuelta OR Pendiente de aprobación
+          MS -> MS: Reiniciar flujo de aprobaciones
+          MS -> DB: Actualizar estado de aprobaciones a pendiente
+        end
+
+        ' Auditoría en tabla + telemetría
+        MS -> DB: Registrar entrada en tabla de auditoría
+        MS -> Insights: Track "TransactionModified" {transactionId,user,changes}
+
+        ' Encolar actualización para microservicios dependientes
+        MS -> Queue: Publish {transactionId, action:"MODIFIED", payload:{changes, estado}}
+        Queue -> Accounts: DeliverMessage {transactionId, payload}
+        Accounts --> Queue: ACK
+
+        MS --> APIM: 200 OK
+        APIM --> UI: 200 OK
+        UI -> Usuario: Modal éxito ("La modificación de la transferencia se ha realizado con éxito")
+      else Modificación no permitida
+        MS -> Insights: Track "ModificationDenied" {transactionId,reason}
+        MS --> APIM: 409 / 400
+        APIM --> UI: Mostrar mensaje de error
+      end
+    end
+  end
+end
+
+== Manejo de errores técnicos (guardar/consulta) ==
+alt Error al guardar cambios
+  MS --> APIM: 500
+  APIM --> UI: Mostrar modal "No pudimos guardar los cambios" ("Inténtalo más tarde")
+  UI -> Usuario: Botón "Entendido" → cerrar modal y mostrar formulario con datos diligenciados
+  MS -> Insights: Track "SaveError" {transactionId}
+end
+
+note over History: El histórico guarda usuario (username), fecha/hora y detalle de campos modificados
+note over DB: Se guarda registro de auditoría con: usuario, IP, fecha/hora, acción y detalles
+note over Queue: La modificación se notifica a otros microservicios vía cola de mensajes
+
+@enduml

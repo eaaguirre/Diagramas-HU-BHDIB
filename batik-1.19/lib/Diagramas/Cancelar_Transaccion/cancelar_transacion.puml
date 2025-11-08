@@ -1,0 +1,78 @@
+@startuml Cancelar_Transaccion_Queue_Orden_Corregido
+
+' 🎨 Estilo limpio y compatible con PlantUML 1.2025.3
+skinparam backgroundColor white
+skinparam participantBackgroundColor white
+skinparam participantBorderColor black
+skinparam participantFontColor black
+skinparam actorBackgroundColor white
+skinparam actorBorderColor black
+skinparam actorFontColor black
+skinparam databaseBackgroundColor white
+skinparam databaseBorderColor black
+skinparam databaseFontColor black
+skinparam noteBackgroundColor #f9f9f9
+skinparam noteBorderColor #999999
+skinparam noteFontColor black
+
+title Cancelación de Transacción (DB/Approvals primero, publicar en cola al final)
+
+actor Usuario
+participant "Interfaz\n(Histórico → Pendientes)" as UI
+participant "API Management" as APIM
+participant "BHDIBP.MS.AccountTransactions\n(System_services_accounts)" as MS
+participant "Approval Service\n(Aprobaciones)" as Approvals
+database "DB" as DB
+participant "TransactionStatusQueue\n(Azure Queue Storage)" as Queue <<queue>>
+participant "Application Insights\n(Telemetría/Auditoría)" as Insights
+
+== Confirmación en UI ==
+Usuario -> UI: Click en "Cancelar"
+UI -> UI: Mostrar modal de confirmación
+
+alt Usuario confirma
+  UI -> APIM: POST /transacciones/{id}/cancelar
+  APIM -> MS: POST /transactions/{id}/cancel
+
+  group Validación de negocio
+    MS -> MS: Verificar tipo de cliente y tipo de transacción
+    MS -> MS: Verificar estado actual (Ingresada | Pendiente de aprobación | Devuelta)
+  end group
+
+  alt Cancelación permitida
+    ' 1️⃣ Persistencia primero
+    MS -> DB: Update estado = "Revocada por cliente"
+    MS -> DB: Insert auditoría (usuario, ip, fecha/hora, acción)
+
+    ' 2️⃣ Aprobaciones (si aplica)
+    opt Tiene aprobaciones pendientes
+      MS -> Approvals: Cancelar flujo de aprobación (transactionId)
+      Approvals --> MS: OK
+      MS -> DB: Marcar aprobaciones como canceladas
+    end opt
+
+    ' 3️⃣ Telemetría
+    MS -> Insights: Track "TransactionCanceled" {transactionId, estado="Revocada", userId}
+
+    ' 4️⃣ Publicación al FINAL
+    MS -> Queue: Publicar {TransactionId,TransactionStatusId=6, TransactionStatusName="Revocada", UserId}
+    Queue --> MS: ACK
+
+    ' 5️⃣ Respuesta al usuario
+    MS --> APIM: 200 OK
+    APIM --> UI: 200 OK
+    UI -> Usuario: Modal de éxito / refrescar "Pendientes" → mover a "Histórico"
+
+  else Cancelación no permitida (reglas)
+    MS -> Insights: Track "CancelationDenied" {transactionId, motivo, estadoActual}
+    MS --> APIM: 409 / 400
+    APIM --> UI: 409 / 400
+    UI -> Usuario: Modal de error
+  end alt
+
+else Usuario cierra/cancela modal
+  UI -> UI: Cerrar modal (sin cambios)
+  UI -> Insights: Track "CancelationModalClosed"
+end alt
+
+@enduml
